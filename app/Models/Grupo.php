@@ -2,31 +2,56 @@
 
 namespace App\Models;
 
+use DomainException;
 use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
-    protected $fillable = ['curso_id', 'codigo', 'cupo', 'dia', 'hora_inicio', 'hora_fin'];
+    protected $fillable = ['numero_ciclo', 'ano', 'numero_grupo', 'abierto', 'curso_id'];
+
+    protected $casts = ['abierto' => 'boolean'];
 
     public function curso()
     {
         return $this->belongsTo(Curso::class);
     }
 
+    public function docentes()
+    {
+        return $this->belongsToMany(Docente::class, 'docente_grupo');
+    }
+
     public function estudiantes()
     {
-        return $this->belongsToMany(Estudiante::class)->withTimestamps();
+        return $this->belongsToMany(Estudiante::class, 'estudiante_matriculados')
+                    ->using(EstudianteMatriculado::class)
+                    ->withPivot('nota')
+                    ->withTimestamps();
     }
 
-    public function cupoLibre(): int
+    public function asignarDocente(int $codEmpleado): void
     {
-        return $this->cupo - $this->estudiantes()->count();
+        $docente = Docente::where('cod_empleado', $codEmpleado)->firstOrFail();
+
+        if ($this->docentes()->count() >= 2) {
+            throw new DomainException('Un grupo no puede tener más de 2 docentes.');
+        }
+
+        $this->docentes()->syncWithoutDetaching([$docente->id]);
     }
 
-    public function chocaCon(Grupo $otro): bool
+    public function puedeAbrirse(): bool
     {
-        return $this->dia === $otro->dia
-            && $this->hora_inicio < $otro->hora_fin
-            && $otro->hora_inicio < $this->hora_fin;
+        return $this->estudiantes()->count() >= 15
+            && $this->docentes()->count() >= 1;
+    }
+
+    public function abrir(): void
+    {
+        if (! $this->puedeAbrirse()) {
+            throw new DomainException('El grupo no cumple las condiciones para abrirse.');
+        }
+
+        $this->update(['abierto' => true]);
     }
 }
