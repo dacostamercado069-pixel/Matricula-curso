@@ -4,6 +4,7 @@ namespace App\Models;
 
 use DomainException;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class Grupo extends Model
 {
@@ -53,5 +54,14 @@ class Grupo extends Model
         }
 
         $this->update(['abierto' => true]);
+    }
+
+    public function registrarNota(Estudiante $estudiante, float $nota): void
+    {
+        if ($nota < 0 || $nota > 10) {
+            throw new InvalidArgumentException('La nota debe estar entre 0 y 10.');
+        }
+
+        $this->estudiantes()->updateExistingPivot($estudiante->id, ['nota' => $nota]);
     }
 }
