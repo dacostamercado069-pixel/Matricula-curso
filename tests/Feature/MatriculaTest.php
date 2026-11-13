@@ -6,9 +6,11 @@ use App\Models\Estudiante;
 use App\Models\EstudianteMatriculado;
 use App\Models\Grupo;
 use Illuminate\Database\QueryException;
+mutates(Grupo::class);
 
 // Helpers con prefijo mt_ para no chocar con los cp_ de GruposTest.php.
 // Cada test arma sus propios datos: ninguno depende de otro.
+
 
 function mt_grupo01(): Grupo
 {
