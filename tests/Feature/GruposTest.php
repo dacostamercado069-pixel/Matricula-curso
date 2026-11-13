@@ -5,6 +5,7 @@ use App\Models\Docente;
 use App\Models\Estudiante;
 use App\Models\Grupo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+mutates(Grupo::class);
 
 uses(RefreshDatabase::class);
 

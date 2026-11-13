@@ -6,9 +6,11 @@ use App\Models\Estudiante;
 use App\Models\EstudianteMatriculado;
 use App\Models\Grupo;
 use Illuminate\Database\QueryException;
+mutates(Grupo::class);
 
 // Helpers con prefijo mt_ para no chocar con los cp_ de GruposTest.php.
 // Cada test arma sus propios datos: ninguno depende de otro.
+
 
 function mt_grupo01(): Grupo
 {
@@ -193,3 +195,14 @@ test('CP-13 un estudiante no se matricula dos veces en el mismo grupo', function
             ->count()
     )->toBe(1);
 });
+test('C3 acepta las notas límite 0 y 10', function (int $nota) {
+    $grupo = mt_grupo01();
+    $estudiante = mt_estudianteC12345(mt_docente1001());
+    $grupo->estudiantes()->attach($estudiante->id);
+
+    $grupo->registrarNota($estudiante, $nota);
+
+    expect(mt_nota_de($grupo, $estudiante)->nota)
+        ->toBeFloat()
+        ->toBe((float) $nota);
+})->with([0, 10]);
