@@ -32,4 +32,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: ./vendor/bin/pest --mutate --no-cache
+          run: ./vendor/bin/pest --mutate --no-cache --min=80
